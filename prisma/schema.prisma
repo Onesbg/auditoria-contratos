@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./auditoria.db"
+}
+
+enum PerfilUsuario {
+  administrador
+  auditor
+  gerente
+}
+
+enum RespostaTipo {
+  Conforme
+  Nao_conforme
+  Nao_foram_sequer_passados
+}
+
+enum StatusAuditoria {
+  OK
+  Atencao
+  Critico
+  Reuniao_com_a_gerencia
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  perfil    PerfilUsuario
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditorias Auditoria[] @relation("AuditorAuditorias")
+}
+
+model Vendedor {
+  id            String   @id @default(cuid())
+  nome          String
+  sigla         String
+  ativo         Boolean  @default(true)
+  ordemExibicao Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  contratos  Contrato[]
+  auditorias Auditoria[]
+}
+
+model Contrato {
+  id                 String   @id @default(cuid())
+  numeroPastaBitrix  String   @unique
+  nomeCliente        String
+  vendedorId         String
+  dataContrato       DateTime
+  statusContrato     String
+  observacoes        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  vendedor  Vendedor  @relation(fields: [vendedorId], references: [id])
+  auditorias Auditoria[]
+}
+
+model Pergunta {
+  id        String   @id @default(cuid())
+  codigo    String   @unique
+  titulo    String
+  descricao String?
+  ordem     Int
+  ativa     Boolean  @default(true)
+  categoria String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  respostas       RespostaAuditoria[]
+  errosDetectados ErroDetectado[]
+  evidencias      Evidencia[]
+}
+
+model Auditoria {
+  id                    String   @id @default(cuid())
+  contratoId            String
+  auditorId             String
+  vendedorId            String
+  dataAuditoria         DateTime
+  mesReferencia         Int
+  anoReferencia         Int
+  totalItensAuditados   Int      @default(0)
+  totalNaoConformes     Int      @default(0)
+  totalErrosDetectados  Int      @default(0)
+  contratoComErroFlag   Boolean  @default(false)
+  statusAuditoria       StatusAuditoria
+  observacoesGerais     String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  contrato        Contrato            @relation(fields: [contratoId], references: [id])
+  auditor         Usuario             @relation("AuditorAuditorias", fields: [auditorId], references: [id])
+  vendedor        Vendedor            @relation(fields: [vendedorId], references: [id])
+  respostas       RespostaAuditoria[]
+  errosDetectados ErroDetectado[]
+  evidencias      Evidencia[]
+  pdfGerado       PdfGerado?
+}
+
+model RespostaAuditoria {
+  id           String       @id @default(cuid())
+  auditoriaId  String
+  perguntaId   String
+  respostaTipo RespostaTipo
+  respostaTexto String?
+  observacao   String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  auditoria Auditoria @relation(fields: [auditoriaId], references: [id], onDelete: Cascade)
+  pergunta  Pergunta  @relation(fields: [perguntaId], references: [id])
+}
+
+model TipoErro {
+  id        String   @id @default(cuid())
+  nome      String   @unique
+  descricao String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  errosDetectados ErroDetectado[]
+}
+
+model ErroDetectado {
+  id                String   @id @default(cuid())
+  auditoriaId       String
+  tipoErroId        String
+  perguntaIdOpcional String?
+  descricaoLivre    String?
+  createdAt         DateTime @default(now())
+
+  auditoria Auditoria @relation(fields: [auditoriaId], references: [id], onDelete: Cascade)
+  tipoErro  TipoErro   @relation(fields: [tipoErroId], references: [id])
+  pergunta  Pergunta?  @relation(fields: [perguntaIdOpcional], references: [id])
+}
+
+model Evidencia {
+  id            String   @id @default(cuid())
+  auditoriaId   String
+  perguntaId    String?
+  nomeArquivo   String
+  caminhoArquivo String
+  tipoArquivo   String
+  createdAt     DateTime @default(now())
+
+  auditoria Auditoria @relation(fields: [auditoriaId], references: [id], onDelete: Cascade)
+  pergunta  Pergunta? @relation(fields: [perguntaId], references: [id])
+}
+
+model PdfGerado {
+  id            String   @id @default(cuid())
+  auditoriaId   String   @unique
+  nomeArquivo   String
+  caminhoArquivo String
+  hashDuplicidade String @unique
+  createdAt     DateTime @default(now())
+
+  auditoria Auditoria @relation(fields: [auditoriaId], references: [id], onDelete: Cascade)
+}
