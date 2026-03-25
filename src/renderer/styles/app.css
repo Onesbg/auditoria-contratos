@@ -1,0 +1,19 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #1f2937; background: #f3f4f6; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.app-shell { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar { background: #111827; color: #fff; padding: 18px; }
+.sidebar a { display: block; color: #d1d5db; text-decoration: none; margin: 8px 0; padding: 8px; border-radius: 8px; }
+.sidebar a.active,.sidebar a:hover { background: #1f2937; color:#fff; }
+.content { padding: 20px; }
+.grid { display: grid; gap: 12px; }
+.grid.cards { grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); }
+.card { background:#fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+.table th,.table td { padding:10px; border-bottom:1px solid #e5e7eb; text-align:left; }
+input,select,textarea,button { width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; }
+button { cursor:pointer; background:#2563eb; color:#fff; border:none; width:auto; }
+.row { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:8px; margin-bottom:8px; }
+.status-OK{color:#059669;font-weight:600}.status-Atenção{color:#d97706;font-weight:600}.status-Crítico{color:#dc2626;font-weight:600}.status-Reunião\ com\ a\ gerência{color:#7c3aed;font-weight:600}
+.login-wrap { min-height: 100vh; display:flex; align-items:center; justify-content:center; }
+.login-box { background:#fff; border-radius:12px; padding:28px; width:340px; }
